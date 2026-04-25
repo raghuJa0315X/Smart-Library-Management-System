@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Library System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --accent: #f72585;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --darker: #020617;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-active: rgba(67, 97, 238, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --sidebar-text: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --primary-light: #4895ef;
+            --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.3);
+        }
+
+        body.light-mode {
+            --darker: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --glass-bg: #ffffff;
+            --glass-border: #cbd5e1;
+            --glass-active: #f1f5f9;
+            --sidebar-text: #1e293b;
+            --card-bg: #ffffff;
+            --primary-light: #2563eb;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 -2px 8px rgba(0, 0, 0, 0.05);
+            background-image: radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.05), transparent 40%) !important;
+        }
+
+        body.light-mode .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+        }
+
+        body.light-mode .panel {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--darker);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(67, 97, 238, 0.08), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(247, 37, 133, 0.08), transparent 40%);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-header {
+            display: none;
+            width: 100%;
+            background: var(--dark);
+            padding: 1rem 1.5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 900;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .hamburger {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            margin-right: -10px;
+            padding-right: 10px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-menu::-webkit-scrollbar-thumb {
+            background: var(--glass-border);
+            border-radius: 10px;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            margin-bottom: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand span {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theme-toggle,
+        .lang-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem;
+            border-radius: 8px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .notification-bell:hover {
+            color: var(--primary-light);
+        }
+
+        .bell-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 2px solid var(--dark);
+        }
+
+        .menu-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+            margin-top: 1.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--glass-active);
+            border-color: rgba(67, 97, 238, 0.3);
+            color: var(--primary-light);
+            transform: translateX(5px);
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-details h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        body.light-mode input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .user-details p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            padding: 2.5rem 3rem;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .top-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .search-bar {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            width: 300px;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            outline: none;
+            width: 100%;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .blue-box {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary-light);
+        }
+
+        .green-box {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .purple-box {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .orange-box {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .stat-info h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-info p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        /* Panels array */
+        .dashboard-body {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .activity-details h4 {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .activity-details p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .badge-status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .b-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .b-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        /* --- MODAL SYSTEM --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary-light);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-light);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 20px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary-light);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 6rem 1.5rem 2rem;
+            }
+
+            .top-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .dashboard-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tiny CSS Chart */
+        .chart-container {
+            width: 100%;
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--primary-light);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            filter: brightness(1.2);
+        }
+    </style>
+</head>
+
+<body class="light-mode">
+
+    <div class="mobile-header">
+        <div class="brand" style="margin: 0; font-size: 1.4rem;">
+            <i class="fa-solid fa-layer-group"></i> SmartLib
+        </div>
+        <button class="hamburger" onclick="toggleSidebar()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Layout -->
+    <aside class="sidebar" id="mainSidebar">
+        <div class="brand">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fa-solid fa-building-columns"></i> SmartLib
+            </div>
+            <span>Govt. of Andhra Pradesh</span>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-title" data-i18n="main_dashboard">Main Dashboard</div>
+            <div class="nav-links">
+                <a onclick="closeAllModals()" class="nav-item active"><i class="fa-solid fa-house"></i> <span data-i18n="home">Home</span></a>
+                <a onclick="openModal('modalCatalog')" class="nav-item"><i class="fa-solid fa-book-open"></i>
+                    <span data-i18n="catalog">Catalog</span></a>
+                <a onclick="openModal('modalMembers')" class="nav-item"><i class="fa-solid fa-users"></i> <span data-i18n="members">Members</span></a>
+            </div>
+
+            <div class="menu-title" data-i18n="library_operations">Library Operations</div>
+            <div class="nav-links">
+                <a onclick="openModal('modalAddBook')" class="nav-item"><i class="fa-solid fa-plus-circle"
+                        style="color:var(--primary-light)"></i> <span data-i18n="add_book">Add New Book</span></a>
+                <a onclick="openModal('modalRegisterMember')" class="nav-item"><i class="fa-solid fa-address-book"
+                        style="color:var(--accent)"></i> <span data-i18n="register_member">Register Member</span></a>
+                <a onclick="openModal('modalIssueBook')" class="nav-item"><i
+                        class="fa-solid fa-arrow-right-from-bracket" style="color:#f59e0b"></i> <span data-i18n="issue_book">Issue Book</span></a>
+                <a onclick="openModal('modalReturnBook')" class="nav-item"><i class="fa-solid fa-arrow-right-to-bracket"
+                        style="color:#10b981"></i> <span data-i18n="return_book">Return Book</span></a>
+            </div>
+
+            <div class="menu-title" data-i18n="administration">Administration</div>
+            <div class="nav-links">
+                <a onclick="openModal('modalAnalytics')" class="nav-item"><i class="fa-solid fa-chart-pie"></i>
+                    <span data-i18n="analytics">Analytics</span></a>
+                <a onclick="openModal('modalOverdue')" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i>
+                    <span data-i18n="overdue_log">Overdue Log</span></a>
+                <a onclick="openModal('modalSettings')" class="nav-item"><i class="fa-solid fa-gear"></i> <span data-i18n="settings">Settings</span></a>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="avatar" id="sidebarAvatar">
+                    <i class="fa-solid fa-user-astronaut"></i>
+                </div>
+                <div class="user-details">
+                    <h4 id="sidebarUserName">Admin User</h4>
+                    <p id="sidebarUserRole">Library Manager</p>
+                </div>
+            </div>
+            <a href="/login/" class="nav-item"
+                style="color:var(--accent); justify-content:center; border:1px solid rgba(247,37,133,0.3); margin-top:0.5rem;">
+                <i class="fa-solid fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="top-header">
+            <div>
+                <h1 id="pageTitle" data-i18n="dashboard_overview">Dashboard Overview</h1>
+                <p style="color: var(--text-muted)" data-i18n="subtitle">Smart Education Initiative • AP State Library Network</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div class="lang-toggle">
+                    <i class="fa-solid fa-language"></i>
+                    <select id="langSelect" onchange="changeLanguage()" style="background:transparent; border:none; color:var(--text-main); outline:none; font-size:0.9rem; cursor:pointer; font-family:'Outfit', sans-serif;">
+                        <option value="en">English</option>
+                        <option value="te">Telugu</option>
+                        <option value="kn">Kannada</option>
+                        <option value="ta">Tamil</option>
+                        <option value="hi">Hindi</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                    </select>
+                </div>
+
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fa-solid fa-sun" id="themeIcon"></i>
+                </div>
+
+                <div class="notification-bell" onclick="openModal('modalNotifications')">
+                    <i class="fa-solid fa-bell"></i>
+                    <div class="bell-dot"></div>
+                </div>
+
+                <div class="search-bar">
+                    <input type="text" id="globalSearchInput" placeholder="Search title, ISBN, or subject...">
+                    <button onclick="performGlobalSearch()"
+                        style="background:var(--primary); border:none; border-radius:8px; color:white; cursor:pointer; width:35px; height:35px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:transform 0.2s;"><i
+                            class="fa-solid fa-search"></i></button>
+                </div>
+
+                <button onclick="startQRScanner()"
+                    style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 0.8rem; border-radius: 12px; color: var(--text-main); cursor: pointer;">
+                    <i class="fa-solid fa-qrcode"></i> Scan
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon-box blue-box"><i class="fa-solid fa-book"></i></div>
+                <div class="stat-info">
+                    <h3>2,543</h3>
+                    <p data-i18n="total_assets">Total Assets</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon-box green-box"><i class="fa-solid fa-box-open"></i></div>
+                <div class="stat-info">
+                    <h3>1,840</h3>
+                    <p data-i18n="active_inventory">Active Inventory</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon-box purple-box"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-info">
+                    <h3>856</h3>
+                    <p data-i18n="reg_members">Registered Members</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon-box orange-box"><i class="fa-solid fa-clock"></i></div>
+                <div class="stat-info">
+                    <h3>42</h3>
+                    <p data-i18n="pending_returns">Pending Returns</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title" data-i18n="active_borrowings">Active Borrowings</span>
+                    <a href="#" style="color:var(--primary-light); text-decoration:none; font-size:0.9rem;">View All</a>
+                </div>
+                <div>
+                    <div class="activity-item">
+                        <i class="fa-solid fa-book" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                        <div class="activity-details" style="flex:1;">
+                            <h4>The Great Gatsby</h4>
+                            <p>Issued to: John Doe (Mem ID: M-101)</p>
+                        </div>
+                        <span class="badge-status b-warning">Due in 2 days</span>
+                    </div>
+                    <div class="activity-item">
+                        <i class="fa-solid fa-book" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                        <div class="activity-details" style="flex:1;">
+                            <h4>Clean Architecture</h4>
+                            <p>Issued to: Alice Smith (Mem ID: M-023)</p>
+                        </div>
+                        <span class="badge-status b-success">Due in 14 days</span>
+                    </div>
+                    <div class="activity-item" style="border:none;">
+                        <i class="fa-solid fa-book" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                        <div class="activity-details" style="flex:1;">
+                            <h4>Introduction to Algorithms</h4>
+                            <p>Issued to: Bob Johnson (Mem ID: M-199)</p>
+                        </div>
+                        <span class="badge-status b-success">Due in 20 days</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title" data-i18n="system_alerts">System Alerts</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <div
+                        style="background: rgba(247,37,133,0.1); padding:1rem; border-radius:12px; border:1px solid rgba(247,37,133,0.2);">
+                        <strong style="color:var(--accent); font-size:0.9rem;"><i
+                                class="fa-solid fa-circle-exclamation"></i> Overdue Notice</strong>
+                        <p style="font-size:0.8rem; margin-top:0.3rem;">3 members have books overdue by more than 7
+                            days.</p>
+                    </div>
+                    <div
+                        style="background: rgba(16,185,129,0.1); padding:1rem; border-radius:12px; border:1px solid rgba(16,185,129,0.2);">
+                        <strong style="color:#10b981; font-size:0.9rem;"><i class="fa-solid fa-server"></i> System
+                            Status</strong>
+                        <p style="font-size:0.8rem; margin-top:0.3rem;">All services running perfectly. Database backup
+                            completed 2 hours ago.</p>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="panel-title">Digital Resource Hub</span>
+                        <a href="#" style="color:var(--primary-light); text-decoration:none; font-size:0.9rem;">Browse
+                            E-Library</a>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+                        <div
+                            style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:12px; border:1px solid var(--glass-border);">
+                            <i class="fa-solid fa-file-pdf"
+                                style="color:var(--accent); margin-bottom:0.5rem; font-size:1.2rem;"></i>
+                            <h4 style="font-size:0.85rem;">AP History Vol 1</h4>
+                            <p style="font-size:0.7rem; color:var(--text-muted);">PDF • 12.4 MB</p>
+                        </div>
+                        <div
+                            style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:12px; border:1px solid var(--glass-border);">
+                            <i class="fa-solid fa-tablet-screen-button"
+                                style="color:var(--primary-light); margin-bottom:0.5rem; font-size:1.2rem;"></i>
+                            <h4 style="font-size:0.85rem;">Modern Physics</h4>
+                            <p style="font-size:0.7rem; color:var(--text-muted);">EPUB • Interactive</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </main>
+
+    <!-- Notifications Modal -->
+    <div class="modal-overlay" id="modalNotifications">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('modalNotifications')"><i
+                    class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-bell" style="color: var(--accent);"></i> System Notifications
+            </h2>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <div class="activity-item"
+                    style="background: rgba(67, 97, 238, 0.05); border-radius: 12px; margin-bottom: 0.8rem; border-left: 4px solid var(--primary-light);">
+                    <div class="activity-details" style="padding: 0.5rem;">
+                        <h4 style="font-size: 0.9rem;">Book Due Tomorrow</h4>
+                        <p style="font-size: 0.8rem;">Modern Operating Systems is due on 2026-04-23.</p>
+                        <span style="font-size: 0.7rem; color: var(--primary-light);">2 hours ago</span>
+                    </div>
+                </div>
+                <div class="activity-item" style="border-radius: 12px; margin-bottom: 0.8rem;">
+                    <div class="activity-details" style="padding: 0.5rem;">
+                        <h4 style="font-size: 0.9rem;">Fine Paid Successfully</h4>
+                        <p style="font-size: 0.8rem;">Payment of ₹50.00 for Transaction #TRX449 confirmed.</p>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">Yesterday</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- 1. Add Book Modal -->
+    <div class="modal-overlay" id="modalAddBook">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('modalAddBook')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-plus-circle" style="color: var(--primary-light);"></i> Add New
+                Book</h2>
+            <form
+                onsubmit="event.preventDefault(); successAlert('Book successfully added!'); closeModal('modalAddBook');">
+                <div class="form-group">
+                    <label>Book Title</label>
+                    <input type="text" placeholder="Enter full book title" required>
+                </div>
+                <div class="form-group">
+                    <label>Author</label>
+                    <input type="text" placeholder="Author name" required>
+                </div>
+                <div class="form-group">
+                    <label>ISBN Number</label>
+                    <input type="text" placeholder="e.g. 978-3-16-148410-0" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select required>
+                        <option value="">Select category...</option>
+                        <option value="sci">Science Fiction</option>
+                        <option value="tech">Technology</option>
+                        <option value="fict">Fiction</option>
+                        <option value="hist">History</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Add Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Register Member Modal -->
+    <div class="modal-overlay" id="modalRegisterMember">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('modalRegisterMember')"><i
+                    class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-address-book" style="color: var(--accent);"></i> Register
+                Member</h2>
+            <form
+                onsubmit="event.preventDefault(); successAlert('Member successfully registered!'); closeModal('modalRegisterMember');">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Member's full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="Email address" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="Contact number" required>
+                </div>
+                <div class="form-group">
+                    <label>Membership Type</label>
+                    <select required>
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="visitor">Visitor</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Register Member</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Issue Book Modal -->
+    <div class="modal-overlay" id="modalIssueBook">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('modalIssueBook')"><i
+                    class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-arrow-right-from-bracket" style="color: #f59e0b;"></i> Issue
+                Book</h2>
+            <form
+                onsubmit="event.preventDefault(); successAlert('Book successfully issued!'); closeModal('modalIssueBook');">
+                <div class="form-group">
+                    <label>Book ID / Search</label>
+                    <input type="text" placeholder="Enter Book ID or title" required>
+                </div>
+                <div class="form-group">
+                    <label>Member ID</label>
+                    <input type="text" placeholder="Enter Member ID" required>
+                </div>
+                <div class="form-group">
+                    <label>Issue Date</label>
+                    <input type="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" required>
+                </div>
+                <button type="submit" class="btn-submit">Issue Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. Return Book Modal -->
+    <div class="modal-overlay" id="modalReturnBook">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('modalReturnBook')"><i
+                    class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-arrow-right-to-bracket" style="color: #10b981;"></i> Return
+                Book</h2>
+            <form
+                onsubmit="event.preventDefault(); successAlert('Book successfully returned!'); closeModal('modalReturnBook');">
+                <div class="form-group">
+                    <label>Book ID / Transaction ID</label>
+                    <input type="text" placeholder="Enter Book ID or Scanner Code" required>
+                </div>
+                <div class="form-group">
+                    <label>Return Date</label>
+                    <input type="date" required>
+                </div>
+                <div class="form-group">
+                    <label>Condition</label>
+                    <select required>
+                        <option value="good">Good / Unchanged</option>
+                        <option value="damaged">Damaged</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit"
+                    style="background: linear-gradient(135deg, #10b981, #059669);">Confirm Return</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Catalog Modal -->
+    <div class="modal-overlay" id="modalCatalog">
+        <div class="modal-card" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal('modalCatalog')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-book-open" style="color: var(--text-main);"></i> Library
+                Catalog Search</h2>
+            <div class="search-bar" style="margin-bottom: 1.5rem; width: 100%;">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search by Category, ISBN, or Author...">
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <div class="activity-item">
+                    <i class="fa-solid fa-book" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                    <div class="activity-details" style="flex:1;">
+                        <h4>The Great Gatsby</h4>
+                        <p>F. Scott Fitzgerald • ISBN: 978-0743273565</p>
+                    </div>
+                    <span class="badge-status b-success">Available</span>
+                </div>
+                <div class="activity-item">
+                    <i class="fa-solid fa-book" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                    <div class="activity-details" style="flex:1;">
+                        <h4>Clean Architecture</h4>
+                        <p>Robert C. Martin • ISBN: 978-0134494166</p>
+                    </div>
+                    <span class="badge-status b-warning">Issued</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Members Modal -->
+    <div class="modal-overlay" id="modalMembers">
+        <div class="modal-card" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal('modalMembers')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-users" style="color: var(--text-main);"></i> Registered
+                Members</h2>
+            <div class="search-bar" style="margin-bottom: 1.5rem; width: 100%;">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search member database...">
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <div class="activity-item">
+                    <i class="fa-solid fa-user" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                    <div class="activity-details" style="flex:1;">
+                        <h4>John Doe</h4>
+                        <p>Student • ID: M-101 • Email: john@example.com</p>
+                    </div>
+                    <span class="badge-status b-success">Active</span>
+                </div>
+                <div class="activity-item">
+                    <i class="fa-solid fa-user-tie" style="color:var(--text-muted); font-size:1.5rem;"></i>
+                    <div class="activity-details" style="flex:1;">
+                        <h4>Alice Smith</h4>
+                        <p>Faculty • ID: M-023 • Email: alice@example.com</p>
+                    </div>
+                    <span class="badge-status b-success">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div class="modal-overlay" id="modalAnalytics">
+        <div class="modal-card" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal('modalAnalytics')"><i
+                    class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-chart-pie" style="color: var(--primary-light);"></i> Library
+                Analytics Profile</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <i class="fa-solid fa-arrow-trend-up"
+                        style="font-size: 2rem; color: #10b981; margin-bottom: 0.5rem;"></i>
+                    <h3 style="font-size: 1.5rem; color: white;">+12%</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">MoM Borrow Rate</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                    <i class="fa-solid fa-users-viewfinder"
+                        style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
+                    <h3 style="font-size: 1.5rem; color: white;">245</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Weekly Active Visitors</p>
+                </div>
+            </div>
+
+            <h4 style="margin-bottom: 1rem;">Asset Growth (Yearly)</h4>
+            <div class="chart-container">
+                <div class="chart-bar" style="height: 30%;"></div>
+                <div class="chart-bar" style="height: 45%;"></div>
+                <div class="chart-bar" style="height: 60%;"></div>
+                <div class="chart-bar" style="height: 40%;"></div>
+                <div class="chart-bar" style="height: 85%;"></div>
+                <div class="chart-bar" style="height: 70%;"></div>
+                <div class="chart-bar" style="height: 95%;"></div>
+            </div>
+
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 1rem;">Predictive
+                module powered by SmartLib AI.</p>
+        </div>
+    </div>
+
+    <!-- Overdue Log Modal -->
+    <div class="modal-overlay" id="modalOverdue">
+        <div class="modal-card" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal('modalOverdue')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-clock-rotate-left" style="color: #f59e0b;"></i> Overdue Log
+            </h2>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <div class="activity-item">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; font-size:1.5rem;"></i>
+                    <div class="activity-details" style="flex:1;">
+                        <h4 style="color: white;">Harry Potter & the Sorcerer's Stone</h4>
+                        <p>Issued to: Tom Riddle • Overdue by: 12 days • Fine: $6.00</p>
+                    </div>
+                    <button onclick="successAlert('Reminder sent!')"
+                        style="background: rgba(67, 97, 238, 0.2); border: 1px solid var(--primary-light); color: var(--primary-light); padding: 0.3rem 0.8rem; border-radius: 6px; cursor:pointer;">Send
+                        Alert</button>
+                </div>
+                <div class="activity-item">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; font-size:1.5rem;"></i>
+                    <div class="activity-details" style="flex:1;">
+                        <h4 style="color: white;">A Brief History of Time</h4>
+                        <p>Issued to: S. Hawking • Overdue by: 3 days • Fine: $1.50</p>
+                    </div>
+                    <button onclick="successAlert('Reminder sent!')"
+                        style="background: rgba(67, 97, 238, 0.2); border: 1px solid var(--primary-light); color: var(--primary-light); padding: 0.3rem 0.8rem; border-radius: 6px; cursor:pointer;">Send
+                        Alert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div class="modal-overlay" id="modalSettings">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal('modalSettings')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-user-gear" style="color: var(--primary-light);"></i> Profile
+                Settings</h2>
+            <form onsubmit="saveProfileChanges(event)">
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+                    <div class="avatar" id="settingsAvatarPreview"
+                        style="width: 80px; height: 80px; font-size: 2rem; margin-bottom: 1rem; overflow: hidden;">
+                        <i class="fa-solid fa-user" id="defaultAvatarIcon"></i>
+                        <img id="avatarImagePreview" src=""
+                            style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    </div>
+                    <label for="dpUpload"
+                        style="cursor: pointer; color: var(--primary-light); font-size: 0.9rem; font-weight: 500;">
+                        <i class="fa-solid fa-camera"></i> Change Profile Picture
+                    </label>
+                    <input type="file" id="dpUpload" style="display: none;" accept="image/*"
+                        onchange="previewAvatar(this)">
+                </div>
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="settingsFullName" placeholder="Your full name" value="Admin User">
+                </div>
+
+                <div class="form-group">
+                    <label>Bio / Information</label>
+                    <textarea id="settingsBio"
+                        style="width: 100%; padding: 0.8rem 1rem; border-radius: 10px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border); color: var(--text-main); outline: none; transition: border-color 0.3s; resize: none; height: 80px;"
+                        placeholder="Tell us about yourself...">Library Manager at SmartLib Main Campus.</textarea>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 1.5rem 0;">
+
+                <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--accent);"><i
+                        class="fa-solid fa-shield-halved"></i> Security & Login Credentials</h3>
+
+                <div
+                    style="background: rgba(247, 37, 133, 0.05); padding: 1rem; border-radius: 12px; border: 1px solid rgba(247, 37, 133, 0.1); margin-bottom: 1.5rem;">
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.8rem;">To change Admin
+                        credentials, verify previous admin first:</p>
+                    <div class="form-group">
+                        <label>Current Admin Username</label>
+                        <input type="text" id="verifyOldUser" placeholder="Enter current admin username">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label>Current Admin Password</label>
+                        <input type="password" id="verifyOldPass" placeholder="Enter current admin password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>New Admin Username (Leave blank to keep current)</label>
+                    <input type="text" id="newAdminUser" placeholder="Enter new username">
+                </div>
+
+                <div class="form-group">
+                    <label>New Admin Password (Leave blank to keep current)</label>
+                    <input type="password" id="newAdminPass" placeholder="Enter new password">
+                </div>
+
+                <button type="submit" class="btn-submit">Verify & Update Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Results Modal -->
+    <div class="modal-overlay" id="modalSearch">
+        <div class="modal-card" style="max-width: 600px;">
+            <button class="modal-close" onclick="closeModal('modalSearch')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="modal-title"><i class="fa-solid fa-search" style="color: var(--primary-light);"></i> Search
+                Results</h2>
+            <p id="searchQueryLabel" style="color: var(--text-muted); margin-bottom: 1.5rem;">Showing results for:
+                <strong style="color: white;"></strong></p>
+
+            <div
+                style="background: rgba(16, 185, 129, 0.1); padding:1rem; border-radius:12px; border:1px solid rgba(16,185,129,0.2); margin-bottom: 1rem;">
+                <strong style="color:#10b981; font-size:0.9rem;"><i class="fa-solid fa-check"></i> 1 match found in
+                    Database</strong>
+                <p style="font-size:0.85rem; margin-top:0.3rem;">Simulated result loaded successfully securely from
+                    backend tables.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal QR & Barcode Scanner -->
+    <div class="modal-overlay" id="modalQRScanner">
+        <div class="modal-card">
+            <button class="modal-close" onclick="stopQRScanner()">&times;</button>
+            <h2 class="modal-title" style="font-size: 1.2rem; margin-bottom: 1rem;"><i class="fa-solid fa-barcode"></i> Scanner</h2>
+            <div id="qr-reader" style="width: 100%; max-height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; border: 2px solid var(--primary-light);"></div>
+            
+            <div id="scanner-result-box" style="display: none; background: var(--glass-active); padding: 1rem; border-radius: 12px; margin-top: 1rem; border: 1px solid var(--glass-border); text-align: center;">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Scanned Result</p>
+                <div id="qr-reader-results" style="font-size: 1.2rem; font-weight: 700; color: var(--primary-light); word-break: break-all;"></div>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; margin-top: 1.5rem;">
+                Align the <strong style="color:var(--text-main)">QR Code</strong> or <strong style="color:var(--text-main)">Barcode</strong> within the frame.
+            </p>
+
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; text-align: center;">OR ENTER ID MANUALLY</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="manualScannerInput" placeholder="Enter ID here..." 
+                        style="flex: 1; padding: 0.8rem; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: var(--text-main); outline: none;">
+                    <button onclick="submitManualScan()" 
+                        style="background: var(--primary); color: white; border: none; border-radius: 10px; padding: 0 1.2rem; cursor: pointer; font-weight: 600;">
+                        Enter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Loading Overlay Template (to be cloned into modals) -->
+    <div id="loadingTemplate" style="display: none;">
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p id="loadingText" style="color: var(--text-muted); font-size: 0.9rem;">Loading...</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        let html5QrCode;
+
+        function startQRScanner() {
+            document.getElementById('scanner-result-box').style.display = 'none';
+            openModal('modalQRScanner');
+            
+            // Supporting both QR and various Barcode formats
+            const config = { 
+                fps: 15, 
+                qrbox: { width: 200, height: 150 },
+                aspectRatio: 1.0
+            };
+
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText, decodedResult) => {
+                    // Success callback
+                    const resultBox = document.getElementById('scanner-result-box');
+                    const resultText = document.getElementById('qr-reader-results');
+                    
+                    resultBox.style.display = 'block';
+                    resultText.innerText = decodedText;
+                    
+                    successAlert(`Identity Identified: ${decodedText}`);
+                    
+                    // Add a small delay before closing to let user see the ID
+                    setTimeout(() => stopQRScanner(), 3000);
+                },
+                (errorMessage) => {
+                    // parse error, ignore it.
+                })
+                .catch((err) => {
+                    console.error(err);
+                    const resultText = document.getElementById('qr-reader-results');
+                    document.getElementById('scanner-result-box').style.display = 'block';
+                    resultText.innerText = "Camera Access Error";
+                    resultText.style.color = "var(--accent)";
+                });
+        }
+
+        function submitManualScan() {
+            const manualId = document.getElementById('manualScannerInput').value.trim();
+            if (manualId === "") {
+                alert("Please enter a valid ID.");
+                return;
+            }
+            
+            const resultBox = document.getElementById('scanner-result-box');
+            const resultText = document.getElementById('qr-reader-results');
+            
+            resultBox.style.display = 'block';
+            resultText.innerText = manualId;
+            
+            successAlert(`Manual Entry Success: ${manualId}`);
+            
+            // Clear input
+            document.getElementById('manualScannerInput').value = "";
+            
+            setTimeout(() => stopQRScanner(), 3000);
+        }
+
+        function stopQRScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    closeModal('modalQRScanner');
+                }).catch((err) => {
+                    console.error("Unable to stop scanning.", err);
+                    closeModal('modalQRScanner');
+                });
+            } else {
+                closeModal('modalQRScanner');
+            }
+        }
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const card = modal.querySelector('.modal-card');
+
+            // Check if we need to show a loading state
+            const modules = {
+                'modalAnalytics': 'Loading Analytics...',
+                'modalOverdue': 'Loading Overdue Log...',
+                'modalSettings': 'Loading Settings...',
+                'modalSearch': 'Performing Database Search...'
+            };
+
+            if (modules[modalId]) {
+                // Ensure overlay exists
+                let overlay = card.querySelector('.loading-overlay');
+                if (!overlay) {
+                    const template = document.getElementById('loadingTemplate').querySelector('.loading-overlay').cloneNode(true);
+                    card.appendChild(template);
+                    overlay = template;
+                }
+
+                overlay.querySelector('#loadingText').innerText = modules[modalId];
+                overlay.classList.add('active');
+                modal.classList.add('active');
+
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 1000);
+            } else {
+                modal.classList.add('active');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        function successAlert(msg) {
+            // Placeholder for a nice toast notification, falling back to simple alert
+            alert("✓ " + msg);
+        }
+
+        function performGlobalSearch() {
+            var query = document.getElementById('globalSearchInput').value;
+            if (query.trim() === '') {
+                alert("Please enter a term to search.");
+            } else {
+                document.getElementById('searchQueryLabel').innerHTML = 'Showing database results for: <strong style="color: white;">' + query + '</strong>';
+                openModal('modalSearch');
+            }
+        }
+
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    const imgPreview = document.getElementById('avatarImagePreview');
+                    const defaultIcon = document.getElementById('defaultAvatarIcon');
+                    imgPreview.src = e.target.result;
+                    imgPreview.style.display = 'block';
+                    defaultIcon.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function saveProfileChanges(event) {
+            event.preventDefault();
+
+            const verifyUser = document.getElementById('verifyOldUser').value;
+            const verifyPass = document.getElementById('verifyOldPass').value;
+            const newUser = document.getElementById('newAdminUser').value;
+            const newPass = document.getElementById('newAdminPass').value;
+
+            const currentOfficialUser = "Raghuveer";
+            const currentOfficialPass = "1234";
+
+            // If user is trying to change credentials, they MUST verify old ones
+            if (newUser.trim() !== '' || newPass.trim() !== '') {
+                if (verifyUser !== currentOfficialUser || verifyPass !== currentOfficialPass) {
+                    alert("⚠ SECURITY ALERT: Invalid Current Admin Credentials. Access Denied.");
+                    return;
+                }
+            }
+
+            const newName = document.getElementById('settingsFullName').value;
+            const imgPreview = document.getElementById('avatarImagePreview');
+
+            // Update sidebar Display Name
+            document.getElementById('sidebarUserName').innerText = newName;
+
+            // Update DP in sidebar if changed
+            if (imgPreview.style.display === 'block') {
+                const sidebarAvatar = document.getElementById('sidebarAvatar');
+                sidebarAvatar.innerHTML = `<img src="${imgPreview.src}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            }
+
+            successAlert('Admin Identity Verified. Profile and Login Credentials updated successfully.');
+            closeModal('modalSettings');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('mainSidebar').classList.toggle('show');
+        }
+
+        // Close sidebar on navigation (mobile)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    document.getElementById('mainSidebar').classList.remove('show');
+                }
+            });
+        });
+
+        // Highlight active link
+        function setActive(el) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+
+        const translations = {
+            'en': {
+                'dashboard_overview': 'Dashboard Overview',
+                'subtitle': 'Smart Education Initiative • AP State Library Network',
+                'main_dashboard': 'Main Dashboard',
+                'home': 'Home',
+                'catalog': 'Catalog',
+                'members': 'Members',
+                'library_operations': 'Library Operations',
+                'add_book': 'Add New Book',
+                'register_member': 'Register Member',
+                'issue_book': 'Issue Book',
+                'return_book': 'Return Book',
+                'administration': 'Administration',
+                'analytics': 'Analytics',
+                'overdue_log': 'Overdue Log',
+                'settings': 'Settings',
+                'logout': 'Logout',
+                'total_assets': 'Total Assets',
+                'active_inventory': 'Active Inventory',
+                'reg_members': 'Registered Members',
+                'pending_returns': 'Pending Returns',
+                'active_borrowings': 'Active Borrowings',
+                'system_alerts': 'System Alerts'
+            },
+            'te': {
+                'dashboard_overview': 'డాష్‌బోర్డ్ అవలోకనం',
+                'subtitle': 'స్మార్ట్ ఎడ్యుకేషన్ ఇనిషియేటివ్ • AP స్టేట్ లైబ్రరీ నెట్‌వర్క్',
+                'main_dashboard': 'ప్రధాన డాష్‌బోర్డ్',
+                'home': 'హోమ్',
+                'catalog': 'కాటలాగ్',
+                'members': 'సభ్యులు',
+                'library_operations': 'లైబ్రరీ కార్యకలాపాలు',
+                'add_book': 'కొత్త పుస్తకాన్ని జోడించండి',
+                'register_member': 'సభ్యుని నమోదు',
+                'issue_book': 'పుస్తకం జారీ',
+                'return_book': 'పుస్తకం వాపసు',
+                'administration': 'పరిపాలన',
+                'analytics': 'విశ్లేషణలు',
+                'overdue_log': 'గడువు ముగిసిన లాగ్',
+                'settings': 'సెట్టింగులు',
+                'logout': 'లాగ్ అవుట్',
+                'total_assets': 'మొత్తం ఆస్తులు',
+                'active_inventory': 'క్రియాశీల జాబితా',
+                'reg_members': 'నమోదిత సభ్యులు',
+                'pending_returns': 'పెండింగ్ రిటర్నులు',
+                'active_borrowings': 'క్రియాశీల రుణాలు',
+                'system_alerts': 'సిస్టమ్ హెచ్చరికలు'
+            },
+            'kn': {
+                'dashboard_overview': 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಅವಲೋಕನ',
+                'subtitle': 'ಸ್ಮಾರ್ಟ್ ಶಿಕ್ಷಣ ಉಪಕ್ರಮ • ಎಪಿ ರಾಜ್ಯ ಗ್ರಂಥಾಲಯ ಜಾಲ',
+                'main_dashboard': 'ಮುಖ್ಯ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+                'home': 'ಮುಖಪುಟ',
+                'catalog': 'ಕ್ಯಾಟಲಾಗ್',
+                'members': 'ಸದಸ್ಯರು',
+                'library_operations': 'ಗ್ರಂಥಾಲಯ ಕಾರ್ಯಾಚರಣೆಗಳು',
+                'add_book': 'ಹೊಸ ಪುಸ್ತಕ ಸೇರಿಸಿ',
+                'register_member': 'ಸದಸ್ಯರ ನೋಂದಣಿ',
+                'issue_book': 'ಪುಸ್ತಕ ವಿತರಣೆ',
+                'return_book': 'ಪುಸ್ತಕ ಮರಳಿ ಪಡೆಯುವುದು',
+                'administration': 'ಆಡಳಿತ',
+                'analytics': 'ವಿಶ್ಲೇಷಣೆ',
+                'overdue_log': 'ಬಾಕಿ ಇರುವ ಲಾಗ್',
+                'settings': 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು',
+                'logout': 'ಲಾಗ್‌ಔಟ್',
+                'total_assets': 'ಒಟ್ಟು ಆಸ್ತಿಗಳು',
+                'active_inventory': 'ಸಕ್ರಿಯ ದಾಸ್ತಾನು',
+                'reg_members': 'ನೋಂದಾಯಿತ ಸದಸ್ಯರು',
+                'pending_returns': 'ಬಾಕಿ ಇರುವ ರಿಟರ್ನ್ಸ್',
+                'active_borrowings': 'ಸಕ್ರಿಯ ಎರವಲುಗಳು',
+                'system_alerts': 'ಸಿಸ್ಟಮ್ ಎಚ್ಚರಿಕೆಗಳು'
+            },
+            'ta': {
+                'dashboard_overview': 'டாஷ்போர்டு மேலோட்டம்',
+                'subtitle': 'ஸ்மார்ட் கல்வி முயற்சி • ஏபி மாநில நூலக நெட்வொர்க்',
+                'main_dashboard': 'முதன்மை டாஷ்போர்டு',
+                'home': 'முகப்பு',
+                'catalog': 'பட்டியல்',
+                'members': 'உறுப்பினர்கள்',
+                'library_operations': 'நூலக செயல்பாடுகள்',
+                'add_book': 'புதிய புத்தகத்தைச் சேர்',
+                'register_member': 'உறுப்பினர் பதிவு',
+                'issue_book': 'புத்தக வெளியீடு',
+                'return_book': 'புத்தகத் திரும்ப்பல்',
+                'administration': 'நிர்வாகம்',
+                'analytics': 'பகுப்பாய்வு',
+                'overdue_log': 'காலாவதியான பதிவு',
+                'settings': 'அமைப்புகள்',
+                'logout': 'வெளியேறு',
+                'total_assets': 'மொத்த சொத்துக்கள்',
+                'active_inventory': 'செயலில் உள்ள இருப்பு',
+                'reg_members': 'பதிவு செய்யப்பட்ட உறுப்பினர்கள்',
+                'pending_returns': 'நிலுவையில் உள்ள வருமானங்கள்',
+                'active_borrowings': 'செயலில் உள்ள கடன்கள்',
+                'system_alerts': 'கணினி விழிப்பூட்டல்கள்'
+            },
+            'hi': {
+                'dashboard_overview': 'डैशबोर्ड अवलोकन',
+                'subtitle': 'स्मार्ट शिक्षा पहल • एपी राज्य पुस्तकालय नेटवर्क',
+                'main_dashboard': 'मुख्य डैशबोर्ड',
+                'home': 'होम',
+                'catalog': 'सूची',
+                'members': 'सदस्य',
+                'library_operations': 'पुस्तकालय संचालन',
+                'add_book': 'नई पुस्तक जोड़ें',
+                'register_member': 'सदस्य पंजीकरण',
+                'issue_book': 'पुस्तक जारी करें',
+                'return_book': 'पुस्तक वापस करें',
+                'administration': 'प्रशासन',
+                'analytics': 'विश्लेषण',
+                'overdue_log': 'विलंब शुल्क लॉग',
+                'settings': 'सेटिंग्स',
+                'logout': 'लॉग आउट',
+                'total_assets': 'कुल संपत्ति',
+                'active_inventory': 'सक्रिय इन्वेंटरी',
+                'reg_members': 'पंजीकृत सदस्य',
+                'pending_returns': 'लंबित रिटर्न',
+                'active_borrowings': 'सक्रिय उधार',
+                'system_alerts': 'सिस्टम अलर्ट'
+            },
+            'es': {
+                'dashboard_overview': 'Vista General del Tablero',
+                'subtitle': 'Iniciativa de Educación Inteligente • Red de Bibliotecas del Estado AP',
+                'main_dashboard': 'Tablero Principal',
+                'home': 'Inicio',
+                'catalog': 'Catálogo',
+                'members': 'Miembros',
+                'library_operations': 'Operaciones de Biblioteca',
+                'add_book': 'Agregar Libro',
+                'register_member': 'Registrar Miembro',
+                'issue_book': 'Emitir Libro',
+                'return_book': 'Devolver Libro',
+                'administration': 'Administración',
+                'analytics': 'Analítica',
+                'overdue_log': 'Registro de Atrasos',
+                'settings': 'Ajustes',
+                'logout': 'Cerrar Sesión',
+                'total_assets': 'Activos Totales',
+                'active_inventory': 'Inventario Activo',
+                'reg_members': 'Miembros Registrados',
+                'pending_returns': 'Devoluciones Pendientes',
+                'active_borrowings': 'Préstamos Activos',
+                'system_alerts': 'Alertas del Sistema'
+            },
+            'fr': {
+                'dashboard_overview': 'Aperçu du Tableau de Bord',
+                'subtitle': 'Initiative d\'Éducation Intelligente • Réseau des Bibliothèques d\'État de l\'AP',
+                'main_dashboard': 'Tableau de Bord Principal',
+                'home': 'Accueil',
+                'catalog': 'Catalogue',
+                'members': 'Membres',
+                'library_operations': 'Opérations de Bibliothèque',
+                'add_book': 'Ajouter un Livre',
+                'register_member': 'Inscrire un Membre',
+                'issue_book': 'Émettre un Livre',
+                'return_book': 'Retourner un Livre',
+                'administration': 'Administration',
+                'analytics': 'Analytique',
+                'overdue_log': 'Registre des Retards',
+                'settings': 'Paramètres',
+                'logout': 'Déconnexion',
+                'total_assets': 'Total des Actifs',
+                'active_inventory': 'Inventaire Actif',
+                'reg_members': 'Membres Inscrits',
+                'pending_returns': 'Retours en Attente',
+                'active_borrowings': 'Emprunts Actifs',
+                'system_alerts': 'Alertes Système'
+            }
+        };
+
+        function changeLanguage() {
+            const lang = document.getElementById('langSelect').value;
+            const elements = document.querySelectorAll('[data-i18n]');
+            
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerText = translations[lang][key];
+                }
+            });
+
+            // Update search placeholder as well
+            const searchInput = document.getElementById('globalSearchInput');
+            const placeholders = {
+                'en': 'Search title, ISBN, or subject...',
+                'te': 'శీర్షిక, ISBN లేదా విషయం కోసం వెతకండి...',
+                'kn': 'ಶೀರ್ಷಿಕೆ, ISBN ಅಥವಾ ವಿಷಯಕ್ಕಾಗಿ ಹುಡುಕಿ...',
+                'ta': 'தலைப்பு, ISBN அல்லது பாடத்தைத் தேடுங்கள்...',
+                'hi': 'शीर्षक, ISBN या विषय खोजें...',
+                'es': 'Buscar título, ISBN o tema...',
+                'fr': 'Rechercher un titre, un ISBN ou un sujet...'
+            };
+            searchInput.placeholder = placeholders[lang] || placeholders['en'];
+
+            successAlert(`Language changed to ${document.getElementById('langSelect').options[document.getElementById('langSelect').selectedIndex].text}`);
+        }
+
+        function toggleTheme() {
+            const icon = document.getElementById('themeIcon');
+            document.body.classList.toggle('light-mode');
+            
+            if (document.body.classList.contains('light-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                successAlert("Light Mode enabled");
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                successAlert("Dark Mode enabled");
+            }
+        }
+
+        function simulateQRScanner() {
+            successAlert("Initializing Camera... Scanning for AP Library QR Code...");
+            setTimeout(() => {
+                successAlert("QR Scanned: Book ID AP-LIB-2024-X99 identified.");
+            }, 1500);
+        }
+
+        // Close modal when clicking outside the card
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+
+</html>
